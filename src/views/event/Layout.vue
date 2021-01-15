@@ -13,23 +13,14 @@
 </template>
 
 <script>
-import EventService from '@/services/EventService.js'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   props: ['id'],
-  data() {
-    return {
-      event: null
-    }
-  },
   created() {
-    EventService.getEvent(this.id)
-      .then(response => {
-        this.event = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-  }
+    this.fetchEvent(this.id)
+  },
+  methods: mapActions('event', ['fetchEvent']),
+  computed: mapState({ event: state => state.event.event })
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
-  <h1>Events for Good</h1>
+  <h1>Events for {{ user.user.name }}</h1>
   <div class="events">
-    <EventCard v-for="event in events" :key="event.id" :event="event" />
+    <EventCard v-for="event in event.events" :key="event.id" :event="event" />
     <div class="pagination">
       <router-link
         id="page-prev"
@@ -20,13 +20,16 @@
         Next &#62;
       </router-link>
     </div>
+    <div id="nav">
+      <router-link :to="{ name: 'EventCreate' }">New Event</router-link>
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import EventCard from '@/components/EventCard.vue'
-import EventService from '@/services/EventService.js'
+import { mapActions, mapState } from 'vuex'
 import { watchEffect } from 'vue'
 
 export default {
@@ -35,31 +38,18 @@ export default {
   components: {
     EventCard
   },
-  data() {
-    return {
-      events: null,
-      totalEvents: 0
-    }
-  },
   created() {
     watchEffect(() => {
-      this.events = null
-      EventService.getEvents(2, this.page)
-        .then(response => {
-          this.events = response.data
-          this.totalEvents = response.headers['x-total-count']
-        })
-        .catch(error => {
-          console.log(error)
-        })
+      this.fetchEvents({ perPage: 3, page: this.page })
     })
   },
   computed: {
     hasNextPage() {
-      const pagesTotal = Math.ceil(this.totalEvents / 2)
-      return this.page < pagesTotal
-    }
-  }
+      return this.event.eventsTotal > this.page * 3
+    },
+    ...mapState(['event', 'user'])
+  },
+  methods: mapActions('event', ['fetchEvents'])
 }
 </script>
 
